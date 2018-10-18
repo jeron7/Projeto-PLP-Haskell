@@ -1,6 +1,6 @@
 module Main where
 
-import Game
+import GameCurses
 
 main :: IO ()
 main = playGame

@@ -1,35 +1,30 @@
-module Game where
+module Game(Player(..),
+            playerHead,
+            playerBody,
+            playerLegs,
+            inithialPlayerCollumn,
+            inithialPlayerRow,
+            rows, 
+            collumns,
+            gridTopBottom,
+            gridMiddle
+) where
 
-    import UI.NCurses
+inithialPlayerCollumn = ((quot collumns 2) - 3)
+inithialPlayerRow     = (rows - 4)
+collumns              = 60
+rows                  = 35
 
-    playGame :: IO ()
-    playGame = runCurses $ do
-        setEcho False
-        w <- defaultWindow
-        defaultColor <- newColorID ColorBlue ColorDefault 1
-        let
-            drawPlayer :: Integer -> Integer -> Integer -> Update()
-            drawPlayer y x score = do
-                setColor defaultColor
-                moveCursor y x
-                drawString playerHead
-                moveCursor (y + 1) x
-                drawString playerBody
-                moveCursor (y + 2) x
-                drawString playerLegs
-        updateWindow w $ drawPlayer 1 1 0
-        render
-        waitFor w (\ev -> ev == EventCharacter 'q' || ev == EventCharacter 'Q')
+data Player = Player { row :: Integer,
+                       collumn :: Integer,
+                       points :: Integer
+                     } deriving (Show)
 
-    waitFor :: Window -> (Event -> Bool) -> Curses ()
-    waitFor w p = loop where
-        loop = do
-            ev <- getEvent w Nothing
-            case ev of
-                Nothing -> loop
-                Just ev' -> if p ev' then return () else loop
+playerHead, playerBody, playerLegs :: String
+playerHead = "(^~^)"
+playerBody = "/|_|\\"
+playerLegs = " / \\"
 
-    playerHead, playerBody, playerLegs :: String
-    playerHead = "(^~^)"
-    playerBody = "/|_|\\"
-    playerLegs = " / \\"
+gridTopBottom :: String
+gridTopBottom = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+gridMiddle    = "X"
