@@ -4,4 +4,4 @@
     cabal install alex && cabal install happy && cabal install c2hs && cabal install ncurses
 
 ## Executando com o Cabal:
-    cabal build && cabal run
+    cabal configure && cabal build && cabal run

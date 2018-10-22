@@ -2,31 +2,41 @@ module GameCurses where
 
     import Game
     import UI.NCurses
+    import System.Random
 
-    playGame :: IO ()
+    playGame :: IO()
     playGame = runCurses $ do
         w <- newWindow rows collumns 0 0
         defaultColor <- newColorID ColorDefault ColorDefault 2
-        let 
-            initGame :: Window -> Curses ()
-            initGame w = do
+        let
+            inithialPlayer = Player inithialPlayerRow inithialPlayerCollumn 0
+            init :: Curses ()
+            init = do
                 setEcho False
                 setCursorMode CursorInvisible
-                let player = Player inithialPlayerRow inithialPlayerCollumn 0
-                updatePlayer player
-                updateWindow w $ drawGrid 0 0 defaultColor
+                render
 
             updatePlayer :: Player -> Curses()
             updatePlayer player = do
                 updateWindow w $ drawPlayer player defaultColor
-            
-            jumpPlayer :: Player -> Curses()
-            jumpPlayer player = do
+
+            updateScreen :: Player -> Integer -> Curses ()
+            updateScreen p s = do
+                let
+                    plat = Platform (rows - 1) collumns 100 (-1) 
+                    player = movePlayer p
+                updateWindow w $ drawGrid 0 0 defaultColor
                 updatePlayer player
-                
-        initGame w
-        render
-        waitFor w (\ev -> ev == EventCharacter 'q' || ev == EventCharacter 'Q')
+                render
+                ev <- getEvent w (Just 90)
+                case ev of
+                    Nothing -> updateScreen player s-- Nenhuma tecla pressionada
+                    Just ev'
+                        | ev' == EventCharacter 'q' -> return ()
+                        | ev' == EventCharacter ' ' -> updateScreen (jumpPlayer player) s
+                        | otherwise -> updateScreen player s -- Nenhuma tecla válida pressionada
+        init
+        updateScreen inithialPlayer 0
 
     drawGrid :: Integer -> Integer -> ColorID -> Update()
     drawGrid row collumn color = do
@@ -46,24 +56,21 @@ module GameCurses where
         | otherwise = do
             moveCursor row collumn
             drawString gridMiddle
-            moveCursor row (collumns - 2)
-            drawString gridMiddle
             drawLines' (row + 1) collumn (n - 1)
 
     drawPlayer :: Player -> ColorID -> Update()
     drawPlayer player color = do
+        let
+            head
+                | onAir player = playerHead
+                | otherwise    = playerHeadAir
+            body
+                | onAir player = playerBody
+                | otherwise    = playerBodyAir
         setColor color
         moveCursor (row player) (collumn player)
-        drawString playerHead
+        drawString head
         moveCursor ((row player) + 1) (collumn player)
-        drawString playerBody
+        drawString body
         moveCursor ((row player) + 2) (collumn player)
         drawString playerLegs
-    
-    waitFor :: Window -> (Event -> Bool) -> Curses ()
-    waitFor w p = loop where
-        loop = do
-            ev <- getEvent w Nothing
-            case ev of
-                Nothing -> loop
-                Just ev' -> if p ev' then return () else loop
