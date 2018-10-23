@@ -4,46 +4,30 @@ module Menu (
 
     import GUI
     import GameCurses
+    import Recordes
     import UI.NCurses
-    import System.Random
 
     runMenu :: Curses()
     runMenu = do
-      -- w <- newWindow rows columns 0 0
-      w <- defaultWindow
-      -- redtext <- newColorID ColorGreen ColorDefault 9
-      updateWindow w $ do
-        -- setColor redtext
-        moveCursor (gridY + (quot rows 4) + 0) (gridX + 2)
-        drawString "                    "
-        moveCursor (gridY + (quot rows 4) + 1) (gridX + 2)
-        drawString "    JumpMaster   "
-        moveCursor (gridY + (quot rows 4) + 2) (gridX + 2)
-        drawString "                 "
-        moveCursor (gridY + (quot rows 4) + 3) (gridX + 2)
-        drawString "      Menu      "
-        moveCursor (gridY + (quot rows 4) + 4) (gridX + 2)
-        drawString "      ====      "
-        moveCursor (gridY + (quot rows 4) + 5) (gridX + 2)
-        drawString "                "
-        moveCursor (gridY + (quot rows 4) + 6) (gridX + 2)
-        drawString " 1) Jogar       "
-        moveCursor (gridY + (quot rows 4) + 7) (gridX + 2)
-        drawString " 2) Recordes       "
-        moveCursor (gridY + (quot rows 4) + 8) (gridX + 2)
-        drawString " 3) Créditos       "
-        moveCursor (gridY + (quot rows 4) + 9) (gridX + 2)
-        drawString " 4) Sair       "
-        -- moveCursor (1) (20)
-        -- drawString "XXXXXXXXXXXXXXX"
-
+      w <- newWindow rows columns 0 0
+      updateWindow w $ drawTab menuBody
       render
       ev <- getEvent w (Just 90)
       case ev of
           Nothing -> runMenu -- Nenhuma tecla pressionada
           Just ev'
-              | ev' == EventCharacter '1' -> playGame w
-              -- | ev' == EventCharacter '2' -> runRecordes
+              | ev' == EventCharacter '1' -> initTab w playGame
+              | ev' == EventCharacter '2' -> initTab w runRecordes
               -- | ev' == EventCharacter '3' -> runCreditos
-              | ev' == EventCharacter '4' -> return ()
+              | (ev' == EventCharacter '4') || (ev' == EventCharacter 'q') -> return ()
               | otherwise -> runMenu -- Nenhuma tecla válida pressionada
+
+    menuBody :: [String]
+    menuBody = ["   JumpMaster   ",
+                "================",
+                "      Menu      ",
+                "================",
+                " 1) Jogar       ",
+                " 2) Recordes    ",
+                " 3) Créditos    ",
+                " 4) Sair        "]

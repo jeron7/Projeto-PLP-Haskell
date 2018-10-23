@@ -5,9 +5,9 @@ module GameCurses where
     import UI.NCurses
     import System.Random
 
-    playGame :: Window -> Curses ()
-    playGame w = do
-        -- w <- defaultWindow
+    playGame :: Curses ()
+    playGame = do
+        w <- newWindow rows columns 0 0
         defaultColor <- newColorID ColorDefault ColorDefault 2
         let
             inithialPlayer = Player inithialPlayerRow inithialPlayerCollumn 0
@@ -16,23 +16,21 @@ module GameCurses where
             updatePlayer player = do
                 updateWindow w $ drawPlayer player defaultColor
 
-            updateScreen :: Player -> Integer -> Curses ()
-            updateScreen p s = do
-                let
-                    plat = Platform (rows - 1) columns 100 (-1)
-                    player = movePlayer p
+            updateGame :: Player -> Integer -> Curses ()
+            updateGame p s = do
+                let player = movePlayer p
                 updateWindow w $ drawGrid 0 0 defaultColor
-                updatePlayer player
+                updatePlayer p
                 render
                 ev <- getEvent w (Just 90)
                 case ev of
-                    Nothing -> updateScreen player s-- Nenhuma tecla pressionada
+                    Nothing -> updateGame player s-- Nenhuma tecla pressionada
                     Just ev'
                         | ev' == EventCharacter 'q' -> return ()
-                        | ev' == EventCharacter ' ' -> updateScreen (jumpPlayer player) s
-                        | otherwise -> updateScreen player s -- Nenhuma tecla válida pressionada
+                        | ev' == EventCharacter ' ' -> updateGame (jumpPlayer p) s
+                        | otherwise -> updateGame player s -- Nenhuma tecla válida pressionada
 
-        updateScreen inithialPlayer 0
+        updateGame inithialPlayer 0
 
     drawGrid :: Integer -> Integer -> ColorID -> Update()
     drawGrid row collumn color = do

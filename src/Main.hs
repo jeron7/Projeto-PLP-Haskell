@@ -1,9 +1,7 @@
 module Main where
 
-import GameCurses
-import UI.NCurses
 import Menu
-import GUI
+import UI.NCurses
 
 init :: Curses ()
 init = do

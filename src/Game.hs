@@ -1,6 +1,5 @@
 module Game(Player(..),
             Platform(..),
-            Force(..),
             playerHead,
             playerHeadAir,
             playerBody,
@@ -11,8 +10,6 @@ module Game(Player(..),
             inithialPlayerRow,
             movePlayer,
             jumpPlayer,
-            -- rows,
-            -- columns,
             gravity,
             gridTopBottom,
             gridMiddle
@@ -23,8 +20,6 @@ import GUI
 
 inithialPlayerCollumn = ((quot columns 2) - 3)
 inithialPlayerRow     = (rows - 4)
--- columns              = 62
--- rows                  = 35
 gravity               = 1
 
 data Player   = Player { row :: Integer,
@@ -36,8 +31,6 @@ data Platform = Platform { platRow :: Integer,
                            lenght :: Integer,
                            direction :: Integer
                          } deriving (Show)
-data Force = Velocity | Gravity
-            deriving (Eq, Show, Enum)
 
 onFloor :: Player -> Bool
 onFloor player
@@ -62,14 +55,12 @@ getScore platform = (platRow platform)
 playerHead, playerBody, playerLegs :: String
 playerHead = "(^~^)"
 playerBody = "/|_|\\"
-playerLegs = " /.\\"
+playerLegs = " / \\"
 
 playerHeadAir, playerBodyAir :: String
 playerHeadAir = "(^o^)"
 playerBodyAir = "t|_|t"
 
 gridTopBottom :: String
--- gridTopBottom = "**********************************************************"
-gridTopBottom = " "
-gridMiddle = " "
--- gridMiddle    = "*  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  *"
+gridTopBottom = "**********************************************************"
+gridMiddle    = "*                                                        *"
