@@ -1,20 +1,16 @@
 module GameCurses where
 
     import Game
+    import GUI
     import UI.NCurses
     import System.Random
 
-    playGame :: IO()
-    playGame = runCurses $ do
-        w <- newWindow rows collumns 0 0
+    playGame :: Window -> Curses ()
+    playGame w = do
+        -- w <- defaultWindow
         defaultColor <- newColorID ColorDefault ColorDefault 2
         let
             inithialPlayer = Player inithialPlayerRow inithialPlayerCollumn 0
-            init :: Curses ()
-            init = do
-                setEcho False
-                setCursorMode CursorInvisible
-                render
 
             updatePlayer :: Player -> Curses()
             updatePlayer player = do
@@ -23,7 +19,7 @@ module GameCurses where
             updateScreen :: Player -> Integer -> Curses ()
             updateScreen p s = do
                 let
-                    plat = Platform (rows - 1) collumns 100 (-1) 
+                    plat = Platform (rows - 1) columns 100 (-1)
                     player = movePlayer p
                 updateWindow w $ drawGrid 0 0 defaultColor
                 updatePlayer player
@@ -35,7 +31,7 @@ module GameCurses where
                         | ev' == EventCharacter 'q' -> return ()
                         | ev' == EventCharacter ' ' -> updateScreen (jumpPlayer player) s
                         | otherwise -> updateScreen player s -- Nenhuma tecla válida pressionada
-        init
+
         updateScreen inithialPlayer 0
 
     drawGrid :: Integer -> Integer -> ColorID -> Update()
@@ -46,7 +42,7 @@ module GameCurses where
         drawLines 1 0
         moveCursor (rows - 1) collumn
         drawString gridTopBottom
-    
+
     drawLines :: Integer -> Integer -> Update()
     drawLines row collumn = drawLines' row collumn rows
 
@@ -62,10 +58,10 @@ module GameCurses where
     drawPlayer player color = do
         let
             head
-                | onAir player = playerHead
+                | onFloor player = playerHead
                 | otherwise    = playerHeadAir
             body
-                | onAir player = playerBody
+                | onFloor player = playerBody
                 | otherwise    = playerBodyAir
         setColor color
         moveCursor (row player) (collumn player)

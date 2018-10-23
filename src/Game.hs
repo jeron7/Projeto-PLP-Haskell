@@ -6,24 +6,25 @@ module Game(Player(..),
             playerBody,
             playerBodyAir,
             playerLegs,
-            onAir,
+            onFloor,
             inithialPlayerCollumn,
             inithialPlayerRow,
             movePlayer,
             jumpPlayer,
-            rows, 
-            collumns,
+            -- rows,
+            -- columns,
             gravity,
             gridTopBottom,
             gridMiddle
 ) where
 
 import Data.Typeable
+import GUI
 
-inithialPlayerCollumn = ((quot collumns 2) - 3)
+inithialPlayerCollumn = ((quot columns 2) - 3)
 inithialPlayerRow     = (rows - 4)
-collumns              = 62
-rows                  = 35
+-- columns              = 62
+-- rows                  = 35
 gravity               = 1
 
 data Player   = Player { row :: Integer,
@@ -38,21 +39,21 @@ data Platform = Platform { platRow :: Integer,
 data Force = Velocity | Gravity
             deriving (Eq, Show, Enum)
 
-onAir :: Player -> Bool
-onAir player
+onFloor :: Player -> Bool
+onFloor player
     | (row player) >= (rows - 4) = True
     | otherwise = False
 
 jumpPlayer :: Player -> Player
 jumpPlayer player
-        | (onAir player) = Player (row player) (collumn player) (-3)
+        | (onFloor player) = Player (row player) (collumn player) (-3)
         | otherwise = player
 
 movePlayer :: Player -> Player
 movePlayer player
-        | (onAir player) && ((velocity player) >= 0) = Player (row player) (collumn player) 0
+        | (onFloor player) && ((velocity player) >= 0) = Player (row player) (collumn player) 0
         | otherwise = p
-        where 
+        where
             p = Player ((row player) + (velocity player)) (collumn player) ((velocity player) + gravity)
 
 getScore :: Platform -> Integer
@@ -68,5 +69,7 @@ playerHeadAir = "(^o^)"
 playerBodyAir = "t|_|t"
 
 gridTopBottom :: String
-gridTopBottom = "*************************************************************"
-gridMiddle    = "*  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  *"
+-- gridTopBottom = "**********************************************************"
+gridTopBottom = " "
+gridMiddle = " "
+-- gridMiddle    = "*  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  *"
