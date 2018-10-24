@@ -68,3 +68,20 @@ module GameCurses where
         drawString body
         moveCursor ((row player) + 2) (collumn player)
         drawString playerLegs
+
+    printStringNTimes 0 = return ()
+    printStringNTimes n =
+     do
+      drawString platformTile
+      printStringNTimes (n-1)
+
+    main = printStringNTimes 10
+    drawPlatforms :: Player -> ColorID -> Update()
+    drawPlatforms platforms color = do
+        setColor color
+        moveCursor (row platform) (collumn platform)
+        drawString  platformTile
+        moveCursor ((row player) + 1) (collumn player)
+        drawString body
+        moveCursor ((row player) + 2) (collumn player)
+        drawString playerLegs

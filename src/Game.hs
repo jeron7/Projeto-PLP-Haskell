@@ -49,6 +49,9 @@ movePlayer player
         where
             p = Player ((row player) + (velocity player)) (collumn player) ((velocity player) + gravity)
 
+movePlatform :: Platform -> Platform
+movePlatform platform direction
+
 getScore :: Platform -> Integer
 getScore platform = (platRow platform)
 
@@ -64,3 +67,6 @@ playerBodyAir = "t|_|t"
 gridTopBottom :: String
 gridTopBottom = "**********************************************************"
 gridMiddle    = "*                                                        *"
+
+platformTile :: String
+platformTile = "="
