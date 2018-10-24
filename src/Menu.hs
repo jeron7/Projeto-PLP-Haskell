@@ -6,7 +6,7 @@ module Menu (
     import GameCurses
     import Recordes
     import UI.NCurses
-
+    import Creditos
     runMenu :: Curses()
     runMenu = do
       w <- newWindow rows columns 0 0
@@ -18,7 +18,7 @@ module Menu (
           Just ev'
               | ev' == EventCharacter '1' -> initTab w playGame
               | ev' == EventCharacter '2' -> initTab w runRecordes
-              -- | ev' == EventCharacter '3' -> runCreditos
+              | ev' == EventCharacter '3' -> runCreditos
               | (ev' == EventCharacter '4') || (ev' == EventCharacter 'q') -> return ()
               | otherwise -> runMenu -- Nenhuma tecla válida pressionada
 
