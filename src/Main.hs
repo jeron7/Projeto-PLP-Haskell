@@ -12,4 +12,4 @@ init = do
 main :: IO ()
 main = runCurses $ do
   Main.init
-  runMenu
+  Menu.runMenu

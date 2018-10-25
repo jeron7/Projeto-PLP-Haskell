@@ -10,47 +10,57 @@ module GameCurses where
         w <- newWindow rows columns 0 0
         defaultColor <- newColorID ColorDefault ColorDefault 2
         let
-            inithialPlayer = Player inithialPlayerRow inithialPlayerCollumn 0
+            initialPlayer = Player initialPlayerRow initialPlayerColumn 0
+            currentPlatform = Platform initialPlatformRow initialPlatformColumn 1 1
 
             updatePlayer :: Player -> Curses()
             updatePlayer player = do
-                updateWindow w $ drawPlayer player defaultColor
+              updateWindow w $ drawPlayer player defaultColor
 
-            updateGame :: Player -> Integer -> Curses ()
-            updateGame p s = do
+            updatePlatform :: Platform -> Curses()
+            updatePlatform platform = do
+              updateWindow w $ drawPlatform platform defaultColor
+
+            updateGame :: Player -> Platform -> Integer -> Curses ()
+            updateGame p pt s = do
+
                 let player = movePlayer p
+                let platform = movePlatform pt
+
                 updateWindow w $ drawGrid 0 0 defaultColor
                 updatePlayer p
+                updatePlatform pt
+
                 render
                 ev <- getEvent w (Just 90)
                 case ev of
-                    Nothing -> updateGame player s-- Nenhuma tecla pressionada
+                    Nothing -> updateGame player platform s-- Nenhuma tecla pressionada
                     Just ev'
                         | ev' == EventCharacter 'q' -> return ()
-                        | ev' == EventCharacter ' ' -> updateGame (jumpPlayer p) s
-                        | otherwise -> updateGame player s -- Nenhuma tecla válida pressionada
+                        | ev' == EventCharacter ' ' -> updateGame (jumpPlayer p) pt s
+                        | otherwise -> updateGame player platform s -- Nenhuma tecla válida pressionada
 
-        updateGame inithialPlayer 0
+        updateGame initialPlayer currentPlatform 0
 
     drawGrid :: Integer -> Integer -> ColorID -> Update()
-    drawGrid row collumn color = do
+    drawGrid row column color = do
         setColor color
-        moveCursor row collumn
+        moveCursor row column
         drawString gridTopBottom
         drawLines 1 0
-        moveCursor (rows - 1) collumn
+        moveCursor (rows - 1) column
         drawString gridTopBottom
 
     drawLines :: Integer -> Integer -> Update()
-    drawLines row collumn = drawLines' row collumn rows
+    drawLines row column = drawLines' row column rows
 
     drawLines' :: Integer -> Integer -> Integer -> Update()
-    drawLines' row collumn n
+    drawLines' row column n
         | n < 2 = return()
         | otherwise = do
-            moveCursor row collumn
+            moveCursor row column
             drawString gridMiddle
-            drawLines' (row + 1) collumn (n - 1)
+            drawLines' (row + 1) column (n - 1)
 
     drawPlayer :: Player -> ColorID -> Update()
     drawPlayer player color = do
@@ -62,9 +72,15 @@ module GameCurses where
                 | onFloor player = playerBody
                 | otherwise    = playerBodyAir
         setColor color
-        moveCursor (row player) (collumn player)
+        moveCursor (row player) (column player)
         drawString head
-        moveCursor ((row player) + 1) (collumn player)
+        moveCursor ((row player) + 1) (column player)
         drawString body
-        moveCursor ((row player) + 2) (collumn player)
+        moveCursor ((row player) + 2) (column player)
         drawString playerLegs
+
+    drawPlatform :: Platform -> ColorID -> Update()
+    drawPlatform platform color = do
+        setColor color
+        moveCursor (platRow platform) (platColumn platform)
+        drawString  Game.platformTile
