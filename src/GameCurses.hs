@@ -2,11 +2,17 @@ module GameCurses where
 
     import Game
     import GUI
+    import Nome
     import UI.NCurses
     import System.Random
 
-    playGame :: StdGen -> Curses ()
-    playGame g = do
+    runGame :: IO [String]
+    runGame = newStdGen >>= \g -> runCurses $ do
+        GUI.defaultInitialization
+        game g
+
+    game :: StdGen -> Curses [String]
+    game g = do
         w <- newWindow rows columns 0 0
         defaultColor <- newColorID ColorDefault ColorDefault 2
         white <- newColorID ColorWhite ColorWhite 1
@@ -33,7 +39,12 @@ module GameCurses where
                     moveCursor 0 0
                     drawString $ "Pontuacao: " ++ (show s)
 
-            updateGame :: Player -> Platform -> Integer ->  StdGen -> Curses ()
+            initPersistence :: Curses [String] -> Curses [String]
+            initPersistence tab = do
+                closeWindow w
+                tab
+
+            updateGame :: Player -> Platform -> Integer ->  StdGen -> Curses Integer
             updateGame p pt s gen = do
 
                 let player = movePlayer p s
@@ -47,21 +58,19 @@ module GameCurses where
                 render
 
                 if (gameOver player platform) then
-                    closeWindow w
-                    -- runNome
+                    return score
                 else do
                     ev <- getEvent w (Just 90)
                     case ev of
                         Nothing -> updateGame player platform score gen-- Nenhuma tecla pressionada
                         Just ev'
-                            | ev' == EventCharacter 'q' -> return ()
-                            | ev' == EventCharacter ' ' -> if (onFloor player score) == True then
-                                                                updateGame (jumpPlayer player score) platform score gen
-                                                            else
-                                                                updateGame player platform score gen
+                            | ev' == EventCharacter 'q' -> return score
+                            | ev' == EventCharacter ' ' -> updateGame (jumpPlayer player score) platform score gen
+                            | ev' == EventCharacter 's' -> return s
                             | otherwise -> updateGame player platform score gen -- Nenhuma tecla válida pressionada
-
-        updateGame initialPlayer currentPlatform 0 g
+        
+        score <- updateGame initialPlayer currentPlatform 0 g
+        initPersistence $ runNome score
 
     drawGrid :: Integer -> Integer -> Update()
     drawGrid row column = do

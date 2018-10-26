@@ -1,75 +1,63 @@
 module Recordes (
   runRecordes,
-  listaRecordes,
-  writeRecordes
+  writeRecorde,
+  readRecordes
 ) where
 
     import GUI
-    import Game
     import UI.NCurses
     import Data.List
     import System.IO
+    import System.IO.Unsafe
     import Data.List.Split
-    import System.IO.Unsafe 
-
     
-    runRecordes :: Curses()
-    runRecordes = do
+    runRecordes :: [String] -> Curses Integer
+    runRecordes recordes = do
       w <- newWindow rows columns 0 0
-      updateWindow w $ drawTab recordesBody
+      drawRecordes w recordes
+    
+    drawRecordes :: Window -> [String] -> Curses Integer
+    drawRecordes w recordes = do
+      updateWindow w $ do
+        let bodyTab = recordesTop ++ recordes ++ recordesBottom 
+        drawTab bodyTab
       render
       ev <- getEvent w (Just 90)
       case ev of
-          Nothing -> runRecordes -- Nenhuma tecla pressionada
+          Nothing -> drawRecordes w recordes-- Nenhuma tecla pressionada
           Just ev'
-              | (ev' == EventCharacter 'q') -> closeWindow w
-              | otherwise -> runRecordes
+              | (ev' == EventCharacter '1') -> return 0
+              | (ev' == EventCharacter '2') -> return 4
+              | otherwise -> drawRecordes w recordes
 
-    recordesBody :: [String]
-    recordesBody = ["================",
-                "=== RECORDES ===",
-                "================"] ++ (recordes 0 listaRecordes [])
+    -- O antigo método tava dando problema quando tinha uma linha vazia
+    -- Isso ocorria pelo fato do writeRecordes deixar um \n depois de inserir 
+    readRecordes :: IO [String]
+    readRecordes = do
+        handle <- openFile "recordes.txt" ReadMode
+        contents <- hGetContents handle
+        -- hClose handle
+        return $ lines contents
 
-    recordes :: Int -> [[String]] -> [String] -> [String]
-    recordes n lista result 
-        | n > 9 = result
-        | lista == [] = result
-        | otherwise = recordes (n+1) (tail lista) (result ++ [cab ++ nome ++ (take vezes (repeat ' ')) ++ num])
-          where num = (head lista) !! 0
-                nome = (head lista) !! 1
-                cab = (show (n+1)) ++ "."
-                vezes = 16 - length cab - length num - length nome
+    splitOnComma :: [String] -> [[String]]
+    splitOnComma list = splitOnComma' list [[]] 
 
-    listaRecordes :: [[String]]
-    listaRecordes = stringToList lerRecordes
+    splitOnComma' :: [String] -> [[String]] -> [[String]]
+    splitOnComma' [] aux = aux
+    splitOnComma' (x:xs) aux = splitOnComma' (xs) result
+        where
+            result = aux ++ (map (splitOn ",") [x])
 
-    lerRecordes :: String
-    lerRecordes = do
-        h <- unsafePerformIO . readFile $ "recordes.txt"
-        return h
-
-    writeRecordes :: [[String]] -> IO ()
-    writeRecordes lista = do
-      handle <- openFile "teste.txt" WriteMode
-      hPutStr handle $ unlines (listToString lista [])
-      hClose handle 
-
-    stringToList :: String -> [[String]]
-    stringToList str = do
-        let list = splitOn "\n" str
-        result <- map stringToList' list
-        return result
+    writeRecorde :: [String] -> IO ()
+    writeRecorde lista = do
+        handle <- openFile "recordes.txt" AppendMode
+        hPutStr handle $ (head lista) ++", "++ (last lista) ++ "\n" 
+        hClose handle
     
-    stringToList' :: String -> [String] 
-    stringToList' str = do
-        list <- splitOn "," str
-        return list
-
-    listToString :: [[String]] -> [String] -> [String]
-    listToString lista str 
-      | lista == [] = str
-      | otherwise = listToString novaLista novoString
-      where nome = (head lista) !! 1
-            num = (head lista) !! 0
-            novoString = str ++ [num ++ "," ++ nome]
-            novaLista = (tail lista)
+    recordesTop, recordesBottom :: [String]
+    recordesTop    = ["==================",
+                      "==== RECORDES ====",
+                      "=================="]
+    recordesBottom = ["==================",
+                      "1) Voltar         ",
+                      "2) Sair           "]
