@@ -1,5 +1,7 @@
 module Recordes (
-  runRecordes
+  runRecordes,
+  listaRecordes,
+  writeRecordes
 ) where
 
     import GUI
@@ -46,6 +48,12 @@ module Recordes (
         h <- unsafePerformIO . readFile $ "recordes.txt"
         return h
 
+    writeRecordes :: [[String]] -> IO ()
+    writeRecordes lista = do
+      handle <- openFile "teste.txt" WriteMode
+      hPutStr handle $ unlines (listToString lista [])
+      hClose handle 
+
     stringToList :: String -> [[String]]
     stringToList str = do
         let list = splitOn "\n" str
@@ -56,3 +64,12 @@ module Recordes (
     stringToList' str = do
         list <- splitOn "," str
         return list
+
+    listToString :: [[String]] -> [String] -> [String]
+    listToString lista str 
+      | lista == [] = str
+      | otherwise = listToString novaLista novoString
+      where nome = (head lista) !! 1
+            num = (head lista) !! 0
+            novoString = str ++ [num ++ "," ++ nome]
+            novaLista = (tail lista)

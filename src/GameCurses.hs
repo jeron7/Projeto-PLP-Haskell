@@ -47,7 +47,8 @@ module GameCurses where
                 render
 
                 if (gameOver player platform) then
-                    return ()
+                    closeWindow w
+                    -- runNome
                 else do
                     ev <- getEvent w (Just 90)
                     case ev of
