@@ -12,7 +12,7 @@ module GameCurses where
         white <- newColorID ColorWhite ColorWhite 1
         let
             initialPlayer = Player initialPlayerRow initialPlayerColumn 0
-            currentPlatform = Platform initialPlatformRow initialPlatformColumn 8 (1)
+            initialPlatforms = Platforms initialPlatformRow initialPlatformColumn 8 (1)
 
             updatePlayer :: Player -> Integer -> Curses()
             updatePlayer p s = do
@@ -36,10 +36,10 @@ module GameCurses where
                     drawString $ "Pontuacao: " ++ (show s)
 
             updateGame :: Player -> [Platform] -> Integer ->  StdGen -> Curses ()
-            updateGame p [pt:pts] s gen = do
+            updateGame p (pt:pts) s gen = do
 
                 let player = movePlayer p s
-                let platforms = movePlatforms [pt:pts]
+                let platforms = movePlatforms (pt:pts)
                 let score = incrementScore p pt s
 
                 updateWindow w $ drawGrid 1 0
@@ -48,13 +48,13 @@ module GameCurses where
                 updateScore score
                 render
 
-                if (gameOver player platform) then
+                if (gameOver player platforms) then
                     closeWindow w
                     -- runNome
                 else do
                     ev <- getEvent w (Just 90)
                     case ev of
-                        Nothing -> updateGame player platform score gen-- Nenhuma tecla pressionada
+                        Nothing -> updateGame player platforms score gen-- Nenhuma tecla pressionada
                         Just ev'
                             | ev' == EventCharacter 'q' -> return ()
                             | ev' == EventCharacter ' ' -> if (onFloor player score) == True then
@@ -63,7 +63,7 @@ module GameCurses where
                                                                 updateGame player platform score gen
                             | otherwise -> updateGame player platform score gen -- Nenhuma tecla válida pressionada
 
-        updateGame initialPlayer currentPlatform 0 g
+        updateGame initialPlayer initialPlatforms 0 g
 
     drawGrid :: Integer -> Integer -> Update()
     drawGrid row column = do

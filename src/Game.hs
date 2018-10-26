@@ -17,6 +17,7 @@ module Game(Player(..),
             gridMiddle,
             platformTile,
             movePlatform,
+            movePlatforms,
             gameOver,
             incrementScore
 ) where
@@ -45,6 +46,11 @@ data Platform = Platform { platRow :: Integer,
                            direction :: Integer
                          } deriving (Show)
 
+-- Função que inicializa n plataformas e retorna uma lista com suas instâncias
+Platforms :: Integer -> Integer -> Integer -> Integer -> Integer -> [Platform]
+Platforms n r c sz dir = take n (Platform r)
+
+-- Função que informa se o player está ou não tocando no solo.
 onFloor :: Player -> Integer -> Bool
 onFloor p s
     | (row p) >= floor = True
@@ -68,7 +74,8 @@ movePlayer p s
 -- Move a plataforma na sua direção
 movePlatforms :: [Platform] -> [Platform]
 movePlatforms [] = movePlatforms []
-movePlatforms [pt:pts] = ([movePlatform pt] ++ [movePlatforms pts])
+movePlatforms [pt] = [movePlatform pt]
+movePlatforms (pt:pts) = ([movePlatform pt] ++ (movePlatforms pts))
 
 -- Move a plataforma na sua direção
 movePlatform :: Platform -> Platform
