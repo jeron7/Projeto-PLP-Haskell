@@ -27,7 +27,7 @@ import GUI
 initialPlayerColumn = ((quot columns 2) - 3)
 initialPlayerRow     = (rows - 2)
 -- Caso a direção de construção da plataforma seja negativa,
--- deve iniciar collums - length - 1 
+-- deve iniciar collums - size - 1 
 
 -- initialPlatformColumn = (columns - 11)
 initialPlatformColumn = 1
@@ -40,7 +40,7 @@ data Player   = Player { row :: Integer,
                        } deriving (Show)
 data Platform = Platform { platRow :: Integer,
                            platColumn :: Integer,
-                           length :: Integer,
+                           size :: Integer,
                            direction :: Integer
                          } deriving (Show)
 
@@ -67,7 +67,7 @@ movePlayer p s
 -- Move a plataforma na sua direção
 movePlatform :: Platform -> Platform
 movePlatform pt
-    | (reachPlatformPosition pt == False) = Platform (platRow pt) ((platColumn pt) + (direction pt)) (Game.length pt) (direction pt)
+    | (reachPlatformPosition pt == False) = Platform (platRow pt) ((platColumn pt) + (direction pt)) (Game.size pt) (direction pt)
     | otherwise = pt
 
 -- Se plataforma alcançou o centro do jogo, retorna True. C.C. False
@@ -82,7 +82,7 @@ gameOver p pt
     | (row p)  == (platRow pt) = result
     | otherwise = False
     where
-        platSize = (platColumn pt) + (Game.length pt)
+        platSize = (platColumn pt) + (Game.size pt)
         result
             | (direction pt) > 0 && (column p) == platSize = True
             | (direction pt) < 0 && (column p) + 3 == (platColumn pt) = True
@@ -98,7 +98,7 @@ incrementScore p pt s
     where
         floor = (rows - 2 - s)
         result
-            | (direction pt) > 0 && (column p) < ((platColumn pt) + (Game.length pt)) = s + 1
+            | (direction pt) > 0 && (column p) < ((platColumn pt) + (Game.size pt)) = s + 1
             | (direction pt) < 0 && ((column p) + 3) > ((platColumn pt)) = s + 1
             | otherwise = s
 
