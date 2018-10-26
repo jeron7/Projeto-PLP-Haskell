@@ -37,7 +37,7 @@ module GUI (
   gridY = 0
 
   columns :: Integer
-  columns = 60
+  columns = 62
 
   rows :: Integer
   rows = 35

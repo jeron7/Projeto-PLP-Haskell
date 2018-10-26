@@ -14,7 +14,7 @@ module Creditos (
       case ev of
           Nothing -> runCreditos -- Nenhuma tecla pressionada
           Just ev'
-              | (ev' == EventCharacter '1') -> initTab w playGame
+              -- | (ev' == EventCharacter '1') -> initTab w playGame
               | (ev' == EventCharacter '2') -> return ()
               | otherwise -> runCreditos
 
@@ -22,9 +22,9 @@ module Creditos (
     credits = [     "**** Créditos ****",
                     " Rafael Pontes    ",
                     " Henry Filho      ",
-		    " Junior Mendes    ",
-		    " Matheus Santana  ",
-		    " Jeronimo Jairo   ",
-		    "******************",
-		    " 1) Jogar         ",
-		    " 2) Sair          "]
+                    " Junior Mendes    ",
+                    " Matheus Santana  ",
+                    " Jeronimo Jairo   ",
+                    "******************",
+                    " 1) Jogar         ",
+                    " 2) Sair          "]
