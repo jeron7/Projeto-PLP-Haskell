@@ -27,7 +27,7 @@ import GUI
 initialPlayerColumn = ((quot columns 2) - 3)
 initialPlayerRow     = (rows - 2)
 -- Caso a direção de construção da plataforma seja negativa,
--- deve iniciar collums - size - 1 
+-- deve iniciar collums - size - 1
 
 -- initialPlatformColumn = (columns - 11)
 initialPlatformColumn = 1
@@ -38,6 +38,7 @@ data Player   = Player { row :: Integer,
                          column :: Integer,
                          velocity :: Integer
                        } deriving (Show)
+
 data Platform = Platform { platRow :: Integer,
                            platColumn :: Integer,
                            size :: Integer,
@@ -63,6 +64,11 @@ movePlayer :: Player-> Integer -> Player
 movePlayer p s
         | (onFloor p s) && ((velocity p) >= 0) = Player (rows - 2 - s) (column p) 0
         | otherwise = Player ((row p) + (velocity p)) (column p) ((velocity p) + gravity)
+
+-- Move a plataforma na sua direção
+movePlatforms :: [Platform] -> [Platform]
+movePlatforms [] = movePlatforms []
+movePlatforms [pt:pts] = ([movePlatform pt] ++ [movePlatforms pts])
 
 -- Move a plataforma na sua direção
 movePlatform :: Platform -> Platform

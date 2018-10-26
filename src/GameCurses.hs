@@ -20,11 +20,13 @@ module GameCurses where
                 setColor defaultColor
                 drawPlayer p s
 
-            updatePlatform :: Platform -> Curses()
-            updatePlatform platform = do
+            updatePlatforms :: [Platform] -> Curses()
+            updatePlatforms [] = return ()
+            updatePlatforms [p:ps] = do
               updateWindow w $ do
                 setColor white
-                drawPlatform platform
+                drawPlatform p
+                updatePlatforms ps
 
             updateScore :: Integer -> Curses ()
             updateScore s = do
@@ -33,16 +35,16 @@ module GameCurses where
                     moveCursor 0 0
                     drawString $ "Pontuacao: " ++ (show s)
 
-            updateGame :: Player -> Platform -> Integer ->  StdGen -> Curses ()
-            updateGame p pt s gen = do
+            updateGame :: Player -> [Platform] -> Integer ->  StdGen -> Curses ()
+            updateGame p [pt:pts] s gen = do
 
                 let player = movePlayer p s
-                let platform = movePlatform pt
+                let platforms = movePlatforms [pt:pts]
                 let score = incrementScore p pt s
 
                 updateWindow w $ drawGrid 1 0
                 updatePlayer player score
-                updatePlatform platform
+                updatePlatforms platforms
                 updateScore score
                 render
 
@@ -97,6 +99,13 @@ module GameCurses where
         drawString body
         moveCursor ((row player) - 2) (column player)
         drawString head
+
+
+    drawPlatforms :: [Platform] -> Update()
+    drawPlatforms [] = return ()
+    drawPlatforms [p:ps] = do
+        drawPlatform p
+        drawPlatforms ps
 
     drawPlatform :: Platform -> Update()
     drawPlatform platform = do
