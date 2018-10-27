@@ -1,5 +1,6 @@
 module GUI (
-  initTab,
+  runTab,
+  defaultInitialization,
   drawTab,
   gridX,
   gridY,
@@ -12,10 +13,16 @@ module GUI (
 -- 149 X final
 -- 37 Y Final do terminal
 
-  initTab :: Window -> Curses () -> Curses ()
-  initTab w tab = do
-    closeWindow w
+  runTab :: Curses Integer -> IO Integer
+  runTab tab = runCurses $ do
+    GUI.defaultInitialization
     tab
+
+  defaultInitialization :: Curses ()
+  defaultInitialization = do
+    setEcho False
+    setCursorMode CursorInvisible
+    render
 
   drawTab :: [String] -> Update ()
   drawTab body = drawTab' body 0

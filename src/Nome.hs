@@ -4,30 +4,53 @@ module Nome (
 
     import GUI
     import Recordes
-    import GameCurses
     import UI.NCurses
-    import System.IO
+    import Data.List.Split
 
-    runNome :: Int -> Curses()
+    runNome :: Integer -> Curses [String]
+    runNome 0 = return [""]
     runNome recorde = do
         w <- newWindow rows columns 0 0
-        updateWindow w $ drawTab credits
-        render
-        --nome <- (show entrada) IO de dados no Ncurses
-        let  nomes = inserirRecorde "nome" recorde listaRecordes []
-        --writeRecordes nomes []
-        closeWindow w
-        
-        
-    credits :: [String]
-    credits = ["Digite seu nome:"]
+        let 
+            backspace :: String -> Curses String
+            backspace nome
+                | (Prelude.length nome) > 0 = readNome (init (nome))
+                | otherwise = readNome nome
 
-    inserirRecorde :: String -> Int -> [[String]] -> [[String]] -> [[String]]
-    inserirRecorde nome recorde lista result
-        | lista == [] = result ++ [[(show recorde), nome]]
-        | recorde >= e = result ++ [[(show recorde), nome]] ++ lista
-        | otherwise = inserirRecorde nome recorde (tail lista) (result ++ [(head lista)])
-        where e = read $ (head lista) !! 0
+            readNome :: String -> Curses String
+            readNome nome = do
+                -- Clena o nome
+                updateWindow w $ do
+                    moveCursor 0 0
+                    drawString $ credits nome
+                render
+                updateWindow w $ do
+                    moveCursor 0 0
+                    drawString $ credits $ take (Prelude.length nome) (repeat ' ')
+                ev <- getEvent w (Just 90)
+                case ev of
+                    Nothing -> readNome nome
+                    Just ev'
+                        | (isChar ev') -> readNome ( nome ++ (extractValue ev'))
+                        | ev' == EventCharacter '\n' -> return nome
+                        | ev' == EventSpecialKey KeyBackspace -> backspace nome
+                        | otherwise -> readNome nome
 
-    entrada :: IO String
-    entrada = getLine
+        nome <- (readNome "")
+        return [(show recorde), nome]
+
+    extractValue :: Event -> String
+    extractValue ev = result
+        where
+            result = ((splitOn "'" (show ev)) !! 1)
+
+    isChar :: Event -> Bool
+    isChar ev
+        | ev `elem` events = True
+        | otherwise = False
+        where
+            chars = ['a'..'z'] ++ ['A'..'Z']
+            events = (map EventCharacter chars)
+        
+    credits :: String -> String
+    credits nome = "Digite seu nome: " ++ nome
